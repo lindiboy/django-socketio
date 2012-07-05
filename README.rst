@@ -140,12 +140,20 @@ sending data to other clients, ``socket.send`` which sends data to the
 given socket instance, and ``socket.broadcast`` which sends data to all
 socket instances other than itself.
 
+通过gevent-websocket实现的WebSocket提供了2种方法来发送数据给其他客户端，
+“socket.send”和"socket.broadcast"前者发送数据给指定的socket实例，后者
+发送给所有实例，除了它自己。
+
+
 A common requirement for WebSocket based applications is to divide
 communications up into separate channels. For example a chat site may
 have multiple chat rooms and rather than using ``broadcast`` which
 would send a chat message to all chat rooms, each room would need a
 reference to each of the connected sockets so that ``send`` can be
 called on each socket when a new message arrives for that room.
+
+基于WebSocket的应用的一个普遍需求就是给不同的频道通信，例如一个聊天站点
+会有多个聊天室，如果用广播的话会给所有的聊天室发送消息，
 
 django-socketio extends Socket.IO both on the client and server to
 provide channels that can be subscribed and broadcast to.
@@ -158,6 +166,10 @@ To subscribe to a channel client-side in JavaScript use the
     socket.on('connect', function() {
         socket.subscribe('my channel');
     });
+在客户端订阅频道的代码如上例所示，
+
+当socket订阅了某个频道，你可以从服务端用python对频道广播
+   
 
 Once the socket is subscribed to a channel, you can then
 broadcast to the channel server-side in Python using the
@@ -217,6 +229,9 @@ throughout the relevant stages of a Socket.IO request. These events
 represent the main approach for implementing your socket handling
 logic when using django-socketio.
 
+django_socketio.events 模块提供了一写可以订阅的事件，非常类似django的
+signal，。。。
+
 Events are subscribed to by applying each event as a decorator
 to your event handler functions::
 
@@ -233,6 +248,10 @@ put them into a module called ``events.py`` in one of your apps listed
 in Django's ``INSTALLED_APPS`` setting. django-socketio looks for these
 modules, and will always import them to ensure your event handlers are
 loaded.
+
+我应该把这些event handlers放在项目的什么位置？他们可以在你需要的任何地方在，
+只要他们在django启动的时候被导入，为了确保这些handler一直被加载，可以放到在'
+INSTALLED_APPS‘里列出的app的目录下，作为一个文件保存。
 
 Each event handler takes at least three arguments: the current Django
 ``request``, the Socket.IO ``socket`` the event occurred for, and a
@@ -266,6 +285,7 @@ your views module since they're conceptually similar to views.
 
 Binding Events to Channels
 ==========================
+绑定事件到频道
 
 All events other than the ``on_connect`` event can also be bound to
 particular channels by passing a ``channel`` argument to the event
